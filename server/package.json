@@ -17,6 +17,8 @@
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "express-session": "^1.18.1",
-    "query-string": "^9.1.1"
+    "node-fetch": "^3.3.2",
+    "query-string": "^9.1.1",
+    "request": "^2.88.2"
   }
 }

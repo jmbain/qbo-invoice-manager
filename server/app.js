@@ -4,6 +4,9 @@ import cors from 'cors';
 import session from 'express-session';
 import axios from 'axios';
 import crypto from 'crypto';
+import path from 'path';
+import { fetchCustomersFromQBO, fetchItemsFromQBO, fetchTaxCodes, fetchTaxRates } from './utils/qboApi.js';
+import request from 'request';
 
 const app = express();
 const PORT = process.env.PORT || 5002;
@@ -37,45 +40,52 @@ app.get('/api/authUri', (req, res) => {
 });
 
 // 🔹 Step 2: Handle QuickBooks OAuth Callback
-app.get('/callback', async (req, res) => {
-  const { code, state, realmId } = req.query;
-
-  console.log('🔎 Received callback state:', state);
-  console.log('🔎 Stored session state:', req.session.oauthState);
-
-  if (state !== req.session.oauthState) {
-    console.warn('❌ State mismatch - possible CSRF attack.');
-    return res.status(401).send('State mismatch.');
-  }
-
-  try {
-    const authHeader = Buffer.from(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`).toString('base64');
-
-    const response = await axios.post(
-      process.env.TOKEN_ENDPOINT,
-      new URLSearchParams({
+app.get('/callback', (req, res) => {
+    const { code, state, realmId } = req.query;
+  
+    console.log('🔎 Received state:', state);
+    console.log('🧠 Session state:', req.session.oauthState);
+    console.log('🏢 Realm ID:', realmId);
+  
+    if (state !== req.session.oauthState) {
+      console.warn("❌ OAuth state mismatch or missing session.");
+      return res.status(401).send("State mismatch — possible CSRF or session loss.");
+    }
+  
+    const auth = Buffer.from(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`).toString('base64');
+    const postBody = {
+      url: process.env.TOKEN_ENDPOINT,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Authorization: `Basic ${auth}`,
+      },
+      form: {
         grant_type: 'authorization_code',
         code,
-        redirect_uri: process.env.REDIRECT_URI,
-      }),
-      {
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/x-www-form-urlencoded',
-          Authorization: `Basic ${authHeader}`,
-        },
+        redirect_uri: process.env.REDIRECT_URI
       }
-    );
-
-    token_json = response.data;
-    console.log('✅ OAuth Token JSON:', token_json);
-
-    res.send('Authentication successful! You can close this window.');
-  } catch (error) {
-    console.error('❌ OAuth Token Exchange Error:', error.response?.data || error.message);
-    res.status(500).send('OAuth token exchange failed.');
-  }
-});
+    };
+  
+    request.post(postBody, (err, response) => {
+      if (err) {
+        console.error('OAuth Callback Error:', err);
+        return res.status(500).send('Authentication failed');
+      }
+  
+      const token_json = JSON.parse(response.body);
+      console.log('✅ OAuth Tokens:', token_json);
+  
+      // Fire-and-forget QBO data fetches
+      fetchCustomersFromQBO(token_json, realmId);
+      fetchItemsFromQBO(token_json, realmId);
+      fetchTaxCodes(token_json, realmId);
+      fetchTaxRates(token_json, realmId);
+  
+      // Redirect to frontend right away
+      res.redirect('http://localhost:5173');
+    });
+  });
 
 // Start Server
 app.listen(PORT, () => {

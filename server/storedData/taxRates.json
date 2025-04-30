@@ -1,0 +1,61 @@
+{
+  "9341453903977175": [
+    {
+      "Name": "AZ State tax",
+      "Description": "Sales Tax",
+      "Active": true,
+      "RateValue": 7.1,
+      "AgencyRef": {
+        "value": "1"
+      },
+      "SpecialTaxType": "NONE",
+      "DisplayType": "ReadOnly",
+      "domain": "QBO",
+      "sparse": false,
+      "Id": "1",
+      "SyncToken": "0",
+      "MetaData": {
+        "CreateTime": "2024-12-31T12:17:04-08:00",
+        "LastUpdatedTime": "2024-12-31T12:17:04-08:00"
+      }
+    },
+    {
+      "Name": "California",
+      "Description": "Sales Tax",
+      "Active": true,
+      "RateValue": 8,
+      "AgencyRef": {
+        "value": "2"
+      },
+      "SpecialTaxType": "NONE",
+      "DisplayType": "ReadOnly",
+      "domain": "QBO",
+      "sparse": false,
+      "Id": "3",
+      "SyncToken": "0",
+      "MetaData": {
+        "CreateTime": "2024-12-31T12:17:04-08:00",
+        "LastUpdatedTime": "2024-12-31T12:17:04-08:00"
+      }
+    },
+    {
+      "Name": "Tucson City",
+      "Description": "Sales Tax",
+      "Active": true,
+      "RateValue": 2,
+      "AgencyRef": {
+        "value": "1"
+      },
+      "SpecialTaxType": "NONE",
+      "DisplayType": "ReadOnly",
+      "domain": "QBO",
+      "sparse": false,
+      "Id": "2",
+      "SyncToken": "0",
+      "MetaData": {
+        "CreateTime": "2024-12-31T12:17:04-08:00",
+        "LastUpdatedTime": "2024-12-31T12:17:04-08:00"
+      }
+    }
+  ]
+}
